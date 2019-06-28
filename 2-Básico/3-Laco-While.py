@@ -3,7 +3,9 @@ Estrutura:
 
     while {condição}:
         comandos
-
+        # opcional para interrupção
+        if condicao
+            break
 
 """
 
