@@ -31,7 +31,7 @@ def soma(*valores, digits=2):
     Somando valores
     :param float valores: Valores a serem somados
     :param int digits: Número de dígitos para arredondamento
-    :return: float
+    :return float:
     """
     resultado = 0
     for valor in valores:
