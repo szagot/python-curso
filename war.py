@@ -12,7 +12,6 @@ from random import shuffle
 from random import randint
 
 jogadores = []
-jogador = 's'
 while True:
     jogador = input('Jogador: ').strip().title()
     if not jogador:
@@ -30,10 +29,9 @@ print('-'*30)
 for i, jogador in enumerate(jogadores):
     print(f'{i+1}° - {jogador}')
 
-print('-'*30)
-
 jogador = 0
 while True:
+    print('-'*30)
     print(f'\033[1;34m{jogadores[jogador]}\033[m jogando...')
     ataque = input('Ataque (1 a 3): ')
     if not ataque.isnumeric():
@@ -63,9 +61,13 @@ while True:
     print(f'\033[1;33mDefesa\033[m: {sorted(dados_def, reverse=True)}')
     print('-'*30)
     
-    jogador += 1
-    if jogador >= len(jogadores):
-        jogador = 0
+    opcao = input('Outro ataque [s/n]? ').strip()
+    if not opcao:
+        break
+    if opcao in 'Nn':
+        jogador += 1
+        if jogador >= len(jogadores):
+            jogador = 0
 
 print('-'*30)
 print('\033[1;32mFim de Jogo!\033[m')
