@@ -87,13 +87,15 @@ for i, jogador in enumerate(jogadores):
 jogador = 0
 while True:
     print('-' * tela)
-    print(f'{amend_color(jogadores[jogador], color="white", style="negative", length=tela, align="center")}')
+    print(f'{amend_color(jogadores[jogador], color="blue", style="bold")} jogando...')
     ataque = input('Ataque (1 a 3): ')
     if not ataque.isnumeric():
-        break
+        print('Valor Inválido!')
+        continue
     defesa = input('Defesa (1 a 3): ')
     if not defesa.isnumeric():
-        break
+        print('Valor Inválido!')
+        continue
 
     defesa = int(defesa)
     ataque = int(ataque)
@@ -115,15 +117,41 @@ while True:
     for i in range(0, ataque):
         dados_atq.append(randint(1, 6))
 
+    # Calculando o vencedor
+    dados_atq = sorted(dados_atq, reverse=True)
+    dados_def = sorted(dados_def, reverse=True)
+
+    # Primeiro dados
+    atq_vitorias = 1 if dados_atq[0] > dados_def[0] else 0
+    def_vitorias = 1 if dados_atq[0] <= dados_def[0] else 0
+
+    # Segundo dado
+    if len(dados_atq) > 1 and len(dados_def) > 1:
+        atq_vitorias += 1 if dados_atq[1] > dados_def[1] else 0
+        def_vitorias += 1 if dados_atq[1] <= dados_def[1] else 0
+        # Terceiro dados
+        if len(dados_atq) == len(dados_def) == 3:
+            atq_vitorias += 1 if dados_atq[2] > dados_def[2] else 0
+            def_vitorias += 1 if dados_atq[2] <= dados_def[2] else 0
+
     print('-' * tela)
-    print(f'{amend_color("Ataque:", color="red", style="bold")} {sorted(dados_atq, reverse=True)}')
-    print(f'{amend_color("Defesa:", color="yellow", style="bold")} {sorted(dados_def, reverse=True)}')
+    # Ataque
+    print(f'{amend_color(f"Ataque:", color="red", style="bold")} ganhou', end=' ')
+    print(f'{amend_color(f"{atq_vitorias}", color="red", style="bold")} e perdeu', end=' ')
+    print(f'{amend_color(f"{def_vitorias}", color="red", style="bold")} {dados_atq}')
+    # Defesa
+    print(f'{amend_color(f"Defesa:", color="yellow", style="bold")} ganhou', end=' ')
+    print(f'{amend_color(f"{def_vitorias}", color="yellow", style="bold")} e perdeu', end=' ')
+    print(f'{amend_color(f"{atq_vitorias}", color="yellow", style="bold")} {dados_def}')
+
     print('-' * tela)
 
-    opcao = input('Outro ataque [s/n]? ').strip()
+    opcao = input('Outro ataque [s|n|fim]? ').strip().lower()
     if not opcao:
+        opcao = 's'
+    if opcao == 'fim':
         break
-    if opcao in 'Nn':
+    if opcao == 'n':
         jogador += 1
         if jogador >= len(jogadores):
             jogador = 0
