@@ -16,13 +16,12 @@ arquivo = open('arquivo.txt')
 # Lendo uma linha do arquivo. Após a leitura, o cursor passa para alinha seguinte
 linha = arquivo.readline()
 
-# Lendo todo o arquivo a partir de onde está o cursor
+# Lendo o arquivo inteiro a partir de onde está o cursor
 conteudo = arquivo.read()
 
 # Voltando o cursor para o inicio (o parametro informa o caracter onde o cursor deve parar
 arquivo.seek(0)
 
-# Lendo o arquivo de texto com laço de repeticão
+# Lendo o arquivo de texto com laço de repetição
 for linha in arquivo:
     print(linha)
-
