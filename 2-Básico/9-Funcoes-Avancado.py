@@ -3,6 +3,26 @@
 # Se for criada em uma função uma variável já existente no escopo global,
 # ela não irá afetar a variável global, a menos que antes se use, dentro da função, o comando:
 # ->  global variavel
+#
+# Os tipos de possíveis de escopo são
+#   Local               - variáveis/funções criadas localmente (dentro de funções, por exemplo)
+#                         e que só funcionam naquele escopo
+#   Enclosing Functions - funções criadas dentro de funções encapsuladas
+#   Global              - variáveis/funções atribuídas no inicio do arquivo,
+#                         ou que são declaradas como global dentro de uma função
+#   Bult-in             - variáveis/funções do Python
+#
+# A ordem que o Python irá usar para verificar uma variável ou função é o LEGB (ordem acima)
+# Exemplo:
+x = 0
+def exemplo():
+    # Essa tem prioridade, e não afeta o "x" de fora, a menos que se use antes "global x"
+    x = 50
+    # Esse gunção nunca seria chamada, pois a variável local "x" tem prioridade na chamada
+    def x():
+        return 30
+    x += 10
+    return x
 
 # -> Interactive help
 # No prompt use help(). Ele irá acessar o help do python,
