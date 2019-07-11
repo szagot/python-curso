@@ -50,3 +50,9 @@ for item in conjunto:
 lista = [1,22,33,1,'Daniel',22]
 conjunto = set(lista)
 # -> Resultado {1, 22, 33, 'Daniel'}
+
+# Exemplo em uma função: retorna uma lista com os valores únicos da lista informada
+def unique_list(l):
+    return list(set(l))
+
+print(unique_list(lista))
