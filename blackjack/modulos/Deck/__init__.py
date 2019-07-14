@@ -3,15 +3,13 @@ from random import shuffle
 
 
 class Deck:
-    symbols = ('♥', '♦', '♣', '♠')
-    numbers = ('A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K')
     deck = []
     garbage = []
 
     def __init__(self):
         # Montando Deck
-        for symbol in self.symbols:
-            for number in self.numbers:
+        for symbol in Card.symbols:
+            for number in Card.numbers:
                 self.deck.append(Card(symbol, number))
         self.shuffle()
 
@@ -30,7 +28,7 @@ class Deck:
         :return: Próxima carta do deck
         :rtype: Card
         """
-        if len(self.deck) == 0:
+        if self.qt() == 0:
             return False
 
         card = self.deck[0]
@@ -38,31 +36,21 @@ class Deck:
         self.deck.pop(0)
         return card
 
-    def get_card_value(self, card: Card, ace: bool = False):
+    def qt(self):
         """
-        Verifica o valor da carta
+        Quantidade de cartas ainda no Deck
 
-        :param card: Carta
-        :type card: Card
-
-        :param ace: Está em conjunto com um 10?
-        :type ace: bool
-
-        :return: Valor da Carta
         :rtype: int
         """
-        number = card.get_number()
+        return len(self.deck)
 
-        # Card é válido?
-        if card.get_symbol() not in self.symbols or number not in self.numbers:
-            return 0
-        # É um Ais?
-        if number == 'A':
-            return 11 if ace else 1
-        # É uma carta especial?
-        if number in 'JQK':
-            return 10
-        if number.isnumeric():
-            return int(number)
+    def qt_garbage(self):
+        """
+        Quantidade de cartas na lixeira
 
-        return 0
+        :rtype: int
+        """
+        return len(self.garbage)
+
+    def __len__(self):
+        return self.qt()
