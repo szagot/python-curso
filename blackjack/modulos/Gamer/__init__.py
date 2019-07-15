@@ -65,3 +65,13 @@ class Gamer:
         if self.bet > 0:
             self.insurance = self.bet / 2
             self.amount -= self.insurance
+
+    def split_verify(self):
+        """
+        Verifica se é possível splitar
+        :rtype: bool
+        """
+        return \
+            len(self.hand.cards) == 2 and \
+            self.hand.cards[0].get_number() == self.hand.cards[1].get_number() and \
+            self.amount >= self.bet
