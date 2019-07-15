@@ -42,7 +42,7 @@ class Table:
         self.gamer.hand.add(self.deck.get_card())
 
         # Imprime a tela
-        self.print_table()
+        self.print_table(new_game=True)
 
     def verify_deck(self):
         """
@@ -206,9 +206,10 @@ class Table:
         print()
         Helpers.title(tam=self.screen, espaco=0, character='─')
 
-    def print_table(self, status=''):
+    def print_table(self, status='', new_game=False):
         """
         Impressão de tela
+        :param new_game: É um novo jogo?
         :param status: Situação atual do jogo.
                         '' - Aguardando jogada
                         Outros exemplos:
@@ -223,7 +224,7 @@ class Table:
         Helpers.title('BlackJack', tam=tela, espaco=0, character='─')
 
         # Aposta inicial realizada?
-        if self.gamer.bet == 0:
+        if self.gamer.bet == 0 and new_game:
             while True:
                 error = False
                 bet = 0
@@ -350,6 +351,7 @@ class Table:
             print()
             Helpers.title(tam=tela, espaco=0)
             input('Press [ENTER] to continue...')
+            self.start()
         else:
             for value in self.plays.values():
                 print(value, end=' | ')
