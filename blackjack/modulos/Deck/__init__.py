@@ -1,4 +1,4 @@
-from blackjack.modulos.Card import Card
+from modulos.Card import Card
 from random import shuffle
 
 

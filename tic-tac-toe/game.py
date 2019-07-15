@@ -44,7 +44,7 @@ def print_board():
     print(f'    \033[1;34m1\033[m │ {board["a"][1]} │ {board["b"][1]} │ {board["c"][1]} │')
     print('      ├───┼───┼───┤')
     print(f'    \033[1;34m2\033[m │ {board["a"][2]} │ {board["b"][2]} │ {board["c"][2]} │')
-    print('      └───┴───┴───┘')
+    print('      ──┴───┴───┘')
     title(tam=screen, character='~')
 
 

@@ -1,4 +1,4 @@
-from blackjack.modulos.Card import Card
+from modulos.Card import Card
 
 
 class Hand:
@@ -15,9 +15,19 @@ class Hand:
 
         return self
 
-    def count(self):
+    def free(self):
+        """
+        Zera a mão
+        """
+        self.cards = []
+        return self
+
+    def count(self, second_card_is_hidden=False):
         """
         Conta os valores das cartas na mão
+
+        :param second_card_is_hidden: Indica se a secunda carta do Dealer ainda está oculta
+        :type second_card_is_hidden: bool
 
         :rtype: int
         """
@@ -33,7 +43,10 @@ class Hand:
 
         # Soma os valores
         val = 0
-        for card in self.cards:
+        for i, card in enumerate(self.cards):
+            # Se a segunda carta ainda estiver oculta, não soma o valor
+            if len(self.cards) == 2 and i == 1 and second_card_is_hidden:
+                continue
             val += card.get_value(ace)
 
         return val
