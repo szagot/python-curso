@@ -25,6 +25,13 @@ class Gamer:
 
         return True
 
+    def double(self):
+        """
+        Dobra a aposta
+        """
+        if 0 < self.bet <= self.amount:
+            self.bet *= 2
+
     def bet_wins(self):
         """
         Aposta ganha!
