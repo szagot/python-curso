@@ -34,12 +34,16 @@ class Hand:
         if len(self.cards) == 0:
             return 0
 
-        # Verifica se tem uma carta de valor 10 na mão
+        # Verifica se tem uma carta de valor 10 na mão, caso o a segunda carta não estava oculta
         ace = False
-        for card in self.cards:
-            if card.get_value() == 10:
-                ace = True
-                break
+        if not second_card_is_hidden:
+            for card in self.cards:
+                try:
+                    if card.get_value() == 10:
+                        ace = True
+                        break
+                except:
+                    continue
 
         # Soma os valores
         val = 0

@@ -15,7 +15,7 @@ class Table:
     second_card_is_hidden = True
     split_active = False
     dealer_active = False
-    plays = {'h': '[H]it', 's': '[S]tand', 'u': 'S[u]rrender', 'e': '[E]xit'}
+    plays: dict
 
     def __init__(self):
         self.dealer = Hand()
@@ -24,7 +24,18 @@ class Table:
         self.deck = Deck()
         self.start()
 
+    def init_plays(self):
+        self.plays = {'h': '[H]it', 's': '[S]tand', 'u': 'S[u]rrender', 'e': '[E]xit'}
+        if self.gamer.split_verify() and not self.split_active and not self.dealer_active:
+            self.plays['p'] = 'S[p]lit'
+        if (len(self.gamer.hand.get()) == 2 and not self.split_active and not self.dealer_active) or (
+                len(self.split.hand.get()) == 2 and self.split_active):
+            self.plays['d'] = '[D]ouble'
+
     def start(self):
+        if not self.verify_deck():
+            self.end_game()
+
         """
         Inicia o Jogo
         """
@@ -32,6 +43,7 @@ class Table:
         self.dealer.free()
         self.gamer.hand.free()
         self.split.hand.free()
+        self.second_card_is_hidden = True
 
         # Dá as cartas do Dealer
         self.dealer.add(self.deck.get_card())
@@ -49,7 +61,7 @@ class Table:
         Retorna se o deck ainda tem cartas
         :rtype: bool
         """
-        return self.deck.qt() > 0
+        return self.deck.qt() > 0 and (self.gamer.amount >= 1 or self.gamer.bet > 0 or self.split.bet > 0)
 
     def hit(self, is_double=False):
         """
@@ -58,7 +70,7 @@ class Table:
         :rtype: bool
         """
         if not self.verify_deck():
-            self.end_game()
+            self.stand()
             return False
 
         # Gamer 2 ativo?
@@ -81,6 +93,12 @@ class Table:
             if is_double:
                 self.gamer.double()
                 self.stand()
+
+        if not self.dealer_active and (self.gamer.hand.count() >= 21 or self.split.hand.count() >= 21):
+            self.stand()
+        elif not self.verify_deck() or (not self.dealer_active and self.gamer.hand.count() >= 21):
+            self.end_hound()
+            return False
 
         self.print_table()
 
@@ -153,24 +171,24 @@ class Table:
         # (sem Black Jack)
         else:
             # Gamer
-            if dealer > 21 >= gamer or dealer < gamer <= 21:
-                self.gamer.bet_wins()
-                win = 'Gamer 1 Ganha de Bancada'
-            elif gamer == dealer:
+            if gamer == dealer or gamer > 21 < dealer:
                 self.gamer.game_tie()
                 win = 'Gamer 1 e Bancada Empatam!'
+            elif dealer > 21 >= gamer or dealer < gamer <= 21:
+                self.gamer.bet_wins()
+                win = 'Gamer 1 Ganha de Bancada'
             else:
                 self.gamer.bet_lost()
                 win = 'Bancada Ganha de Gamer 1'
 
             # Split
             if split > 0:
-                if dealer > 21 >= split or dealer < split <= 21:
-                    self.split.bet_wins()
-                    win += ' | Gamer 2 Ganha de Bancada'
-                elif split == dealer:
+                if split == dealer or split > 21 < dealer:
                     self.split.game_tie()
                     win += ' | Gamer 2 e Bancada Empatam!'
+                elif dealer > 21 >= split or dealer < split <= 21:
+                    self.split.bet_wins()
+                    win += ' | Gamer 2 Ganha de Bancada'
                 else:
                     self.split.bet_lost()
                     win += ' | Bancada Ganha de Gamer 2'
@@ -202,13 +220,18 @@ class Table:
         self.print_table()
 
     def end_game(self):
+
+        self.gamer.game_tie()
         Helpers.print_color('Fim de Jogo!', color='red', style='bold', length=self.screen, align='center')
+        Helpers.print_color('─' * 14, align='center', length=self.screen, color='pink')
+        Helpers.print_color(f'Amount: ${self.gamer.amount:>7.1f}', align='center', length=self.screen, color='pink')
         print()
         Helpers.title(tam=self.screen, espaco=0, character='─')
 
-    def print_table(self, status='', new_game=False):
+    def print_table(self, status='', new_game=False, end_game=False):
         """
         Impressão de tela
+        :param end_game: É fim de Jogo?
         :param new_game: É um novo jogo?
         :param status: Situação atual do jogo.
                         '' - Aguardando jogada
@@ -224,18 +247,21 @@ class Table:
         Helpers.title('BlackJack', tam=tela, espaco=0, character='─')
 
         # Aposta inicial realizada?
-        if self.gamer.bet == 0 and new_game:
+        if self.gamer.bet == 0 and new_game and self.verify_deck():
             while True:
                 error = False
                 bet = 0
                 try:
                     print(f'Caixa: {self.gamer.amount}')
-                    bet = float(input('Aposta Inicial: '))
+                    bet = float(input('Aposta Inicial (0 para sair): '))
 
                 except ValueError:
                     error = True
 
-                if error or 0 > bet > self.bet_max or bet > self.gamer.amount:
+                if bet == 0:
+                    self.print_table(end_game=True)
+                    return
+                elif error or bet > self.bet_max or bet > self.gamer.amount:
                     Helpers.print_color('Valor inválido! Tente novamente.', color='red')
                     Helpers.print_color(f'Min: 1, Máx: {self.bet_max}', color='pink')
                 else:
@@ -257,10 +283,10 @@ class Table:
         # Dealer
         dealer_count = self.dealer.count(self.second_card_is_hidden)
         bigger = len(self.dealer.get())
-        if dealer_count < 21:
-            dealer_status = ''
-        elif dealer_count == 21 and len(self.dealer.get()) == 2:
+        if dealer_count == 21 and len(self.dealer.get()) == 2:
             dealer_status = ' (Black Jack!)'
+        elif dealer_count <= 21:
+            dealer_status = ''
         else:
             dealer_status = ' (Estouro!)'
         Helpers.print_color(f'~ Dealer: {dealer_count:0>2}{dealer_status} ~', color='cyan', align='center',
@@ -288,15 +314,19 @@ class Table:
         # Gamer
         gamer_count = self.gamer.hand.count()
         bigger = len(self.gamer.hand.get())
-        if gamer_count < 21:
-            gamer_status = ''
-        elif gamer_count == 21 and len(self.gamer.hand.get()) == 2:
+        if gamer_count == 21 and len(self.gamer.hand.get()) == 2:
             gamer_status = ' (Black Jack!)'
+        elif gamer_count <= 21:
+            gamer_status = ''
         else:
             gamer_status = ' (Estouro!)'
-        Helpers.print_color(f'~ Gamer 1: {gamer_count:0>2}{gamer_status} ~', color='yellow', align='center',
-                            style='bold',
-                            length=tela)
+        Helpers.print_color(
+            f'~ Gamer 1: {gamer_count:0>2}{gamer_status} ~',
+            color='yellow' if not self.split_active else 'gray',
+            align='center',
+            style='bold' if not self.split_active else 'none',
+            length=tela
+        )
         cards_gamer = ''
         cards_gamer_before = ''
         cards_gamer_after = ''
@@ -304,21 +334,30 @@ class Table:
             cards_gamer_before += ' ┌─────┐ '
             cards_gamer_after += ' └─────┘ '
             cards_gamer += f' │ {card} │ '
-        Helpers.print_color(cards_gamer_before, color='green', style='bold', align='center', length=tela)
-        Helpers.print_color(cards_gamer, color='green', style='bold', align='center', length=tela)
-        Helpers.print_color(cards_gamer_after, color='green', style='bold', align='center', length=tela)
+        color = 'green' if not self.split_active else 'gray'
+        bold = 'bold' if not self.split_active else 'none'
+        Helpers.print_color(cards_gamer_before, color=color, style=bold, align='center', length=tela)
+        Helpers.print_color(cards_gamer, color=color, style=bold, align='center', length=tela)
+        Helpers.print_color(cards_gamer_after, color=color, style=bold, align='center', length=tela)
 
+        # Gamer
         split_count = self.split.hand.count()
+        if split_count == 21 and len(self.split.hand.get()) == 2:
+            split_status = ' (Black Jack!)'
+        elif split_count <= 21:
+            split_status = ''
+        else:
+            split_status = ' (Estouro!)'
         if split_count > 0:
             if len(self.split.hand.get()) > len(self.gamer.hand.get()):
                 bigger = len(self.split.hand.get())
             Helpers.print_color('─' * bigger * 9, align='center', length=tela, color='pink')
             split_count = self.split.hand.count()
             Helpers.print_color(
-                f'~ Gamer 2: {split_count:0>2} ~',
-                color='yellow',
+                f'~ Gamer 2: {split_count:0>2}{split_status} ~',
+                color='yellow' if self.split_active else 'gray',
                 align='center',
-                style='bold',
+                style='bold' if self.split_active else 'none',
                 length=tela
             )
             cards_split = ''
@@ -328,9 +367,11 @@ class Table:
                 cards_split_before += ' ┌─────┐ '
                 cards_split_after += ' └─────┘ '
                 cards_split += f' │ {card} │ '
-            Helpers.print_color(cards_split_before, color='green', style='bold', align='center', length=tela)
-            Helpers.print_color(cards_split, color='green', style='bold', align='center', length=tela)
-            Helpers.print_color(cards_split_after, color='green', style='bold', align='center', length=tela)
+            color = 'green' if self.split_active else 'gray'
+            bold = 'bold' if self.split_active else 'none'
+            Helpers.print_color(cards_split_before, color=color, style=bold, align='center', length=tela)
+            Helpers.print_color(cards_split, color=color, style=bold, align='center', length=tela)
+            Helpers.print_color(cards_split_after, color=color, style=bold, align='center', length=tela)
 
         # Aposta
         Helpers.print_color('─' * bigger * 9, align='center', length=tela, color='pink')
@@ -346,18 +387,28 @@ class Table:
         Helpers.title(tam=tela, espaco=0)
         print()
 
-        if status != '':
+        if end_game:
+            self.end_game()
+        elif status != '':
             Helpers.print_color(status, color='red', style='bold', align='center', length=tela)
             print()
             Helpers.title(tam=tela, espaco=0)
-            input('Press [ENTER] to continue...')
-            self.start()
-        else:
-            for value in self.plays.values():
-                print(value, end=' | ')
-
+            if self.verify_deck():
+                input('Press [ENTER] to continue...')
+                self.start()
+            else:
+                self.end_game()
+        elif self.verify_deck():
+            self.init_plays()
+            Helpers.print_color(f'Gamer {"2" if self.split_active else "1"}', color='blue', style='bold', end='')
+            for i, value in enumerate(self.plays.values()):
+                if i == 0:
+                    print(f' ({value}', end='')
+                else:
+                    print(f' | {value}', end='')
+            print(')')
             while True:
-                jogada = str(input('-> Jogada: ')).strip().lower()
+                jogada = str(input('Jogada: ')).strip().lower()
                 if jogada in self.plays.keys():
                     break
                 Helpers.print_color('Opção inválida. Escolha uma das opções acima!')
@@ -374,5 +425,11 @@ class Table:
                 self.stand()
             elif jogada == 'u':
                 self.end_hound()
+            elif jogada == 'd':
+                self.hit(True)
+            elif jogada == 'p':
+                self.slice()
             else:
                 self.print_table()
+        else:
+            self.end_game()

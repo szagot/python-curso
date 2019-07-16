@@ -36,7 +36,7 @@ class Gamer:
         """
         Aposta ganha!
         """
-        self.amount = self.bet * 2
+        self.amount += self.bet * 2
         self.bet = 0
         self.insurance = 0
 
