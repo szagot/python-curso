@@ -25,18 +25,20 @@ class Table:
         self.start()
 
     def init_plays(self):
-        self.plays = {'h': '[H]it', 's': '[S]tand', 'u': 'S[u]rrender', 'e': '[E]xit'}
+        self.plays = {'h': '\033[1;36mH\033[mit', 's': '\033[1;36mS\033[mtand', 'u': 'S\033[1;36mu\033[mrrender'}
         # Double
         if (len(self.gamer.hand.get()) == 2 and not self.split_active and not self.dealer_active) or (
                 len(self.split.hand.get()) == 2 and self.split_active):
-            self.plays['d'] = '[D]ouble'
+            self.plays['d'] = '\033[1;36mD\033[mouble'
         # Split
         if self.gamer.split_verify() and not self.split_active and not self.dealer_active:
-            self.plays['p'] = 'S[p]lit'
+            self.plays['p'] = 'S\033[1;36mp\033[mlit'
         # Insurance
         if self.second_card_is_hidden and not self.split_active and \
                 self.dealer.get()[0].get_number() == 'A' and self.gamer.insurance == 0:
-            self.plays['i'] = '[I]nsurance'
+            self.plays['i'] = '\033[1;36mI\033[mnsurance'
+        # Exit
+        self.plays['e'] = '\033[1;36mE\033[mxit'
 
     def start(self):
         if not self.verify_deck():
