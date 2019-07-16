@@ -26,11 +26,17 @@ class Table:
 
     def init_plays(self):
         self.plays = {'h': '[H]it', 's': '[S]tand', 'u': 'S[u]rrender', 'e': '[E]xit'}
-        if self.gamer.split_verify() and not self.split_active and not self.dealer_active:
-            self.plays['p'] = 'S[p]lit'
+        # Double
         if (len(self.gamer.hand.get()) == 2 and not self.split_active and not self.dealer_active) or (
                 len(self.split.hand.get()) == 2 and self.split_active):
             self.plays['d'] = '[D]ouble'
+        # Split
+        if self.gamer.split_verify() and not self.split_active and not self.dealer_active:
+            self.plays['p'] = 'S[p]lit'
+        # Insurance
+        if self.second_card_is_hidden and not self.split_active and \
+                self.dealer.get()[0].get_number() == 'A' and self.gamer.insurance == 0:
+            self.plays['i'] = '[I]nsurance'
 
     def start(self):
         if not self.verify_deck():
@@ -44,6 +50,8 @@ class Table:
         self.gamer.hand.free()
         self.split.hand.free()
         self.second_card_is_hidden = True
+        self.gamer.bet = 0
+        self.split.bet = 0
 
         # Dá as cartas do Dealer
         self.dealer.add(self.deck.get_card())
@@ -53,15 +61,22 @@ class Table:
         self.gamer.hand.add(self.deck.get_card())
         self.gamer.hand.add(self.deck.get_card())
 
-        # Imprime a tela
-        self.print_table(new_game=True)
+        # Verifica se o Gamer não teve Black Jack de cara
+        if self.gamer.hand.count() == 21:
+            self.hit()
+        else:
+            # Imprime a tela
+            self.print_table(new_game=True)
 
     def verify_deck(self):
         """
         Retorna se o deck ainda tem cartas
         :rtype: bool
         """
-        return self.deck.qt() > 0 and (self.gamer.amount >= 1 or self.gamer.bet > 0 or self.split.bet > 0)
+        if self.deck.qt() < 10:
+            self.deck = Deck()
+
+        return self.deck.qt_garbage() < 90 and (self.gamer.amount >= 1 or self.gamer.bet > 0 or self.split.bet > 0)
 
     def hit(self, is_double=False):
         """
@@ -70,7 +85,7 @@ class Table:
         :rtype: bool
         """
         if not self.verify_deck():
-            self.stand()
+            self.end_hound()
             return False
 
         # Gamer 2 ativo?
@@ -119,6 +134,10 @@ class Table:
             self.dealer_active = True
             self.hit()
 
+    def insurance(self):
+        self.gamer.add_insurance()
+        self.print_table()
+
     def end_hound(self):
         """
         Faz a contagem e paga ou recolhe as apostas
@@ -128,13 +147,6 @@ class Table:
         gamer = self.gamer.hand.count()
         dealer = self.dealer.count()
         win = ''
-
-        # Em caso de rendição, completa o hit do Dealer
-        if dealer < 17:
-            self.dealer_active = True
-            self.split_active = False
-            self.hit()
-            return
 
         # Black Jack!
         split_bj = len(self.split.hand.get()) == 2 and split == 21
@@ -220,13 +232,13 @@ class Table:
         self.print_table()
 
     def end_game(self):
-
         self.gamer.game_tie()
         Helpers.print_color('Fim de Jogo!', color='red', style='bold', length=self.screen, align='center')
         Helpers.print_color('─' * 14, align='center', length=self.screen, color='pink')
         Helpers.print_color(f'Amount: ${self.gamer.amount:>7.1f}', align='center', length=self.screen, color='pink')
         print()
         Helpers.title(tam=self.screen, espaco=0, character='─')
+        exit()
 
     def print_table(self, status='', new_game=False, end_game=False):
         """
@@ -247,7 +259,7 @@ class Table:
         Helpers.title('BlackJack', tam=tela, espaco=0, character='─')
 
         # Aposta inicial realizada?
-        if self.gamer.bet == 0 and new_game and self.verify_deck():
+        if self.gamer.bet == 0 and new_game and self.verify_deck() and not end_game:
             while True:
                 error = False
                 bet = 0
@@ -380,7 +392,7 @@ class Table:
             align='center', length=tela, color='pink'
         )
         if self.gamer.insurance > 0:
-            Helpers.print_color(f'Insurance: ${self.gamer.insurance:>7.1f}', align='center', length=tela, color='pink')
+            Helpers.print_color(f'Insur.: ${self.gamer.insurance:>7.1f}', align='center', length=tela, color='pink')
         Helpers.print_color(f'Amount: ${self.gamer.amount:>7.1f}', align='center', length=tela, color='pink')
 
         print()
@@ -424,11 +436,14 @@ class Table:
             elif jogada == 's':
                 self.stand()
             elif jogada == 'u':
+                self.second_card_is_hidden = False
                 self.end_hound()
             elif jogada == 'd':
                 self.hit(True)
             elif jogada == 'p':
                 self.slice()
+            elif jogada == 'i':
+                self.insurance()
             else:
                 self.print_table()
         else:
