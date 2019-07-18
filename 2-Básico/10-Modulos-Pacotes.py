@@ -18,4 +18,8 @@ Pacotes: São pastas onde ficam os módulos
     # Isso irá chamar apenas o módulo datas
     from uteis import datas
 
+Para instalar de terceiros, no prompt digite
+    pip install <nome do pacote>
+
+Site do Pypi: https://pypi.org/
 """
