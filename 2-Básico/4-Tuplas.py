@@ -10,7 +10,7 @@ MAS NÃO PODE ALTERAR UM ITEM INDIVIDUAL DELA
 """
 
 # Exemplo de for com tupla
-familia = ('Filipe', 'Daniel', 'Alejandro', 'Alini')
+familia = ('Alunos', 'Daniel', 'Alejandro', 'Alini')
 for nome in familia:
     print(f'Muito prazer, {nome}!')
 

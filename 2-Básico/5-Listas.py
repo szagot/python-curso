@@ -13,7 +13,7 @@ Ao fazer lista1 = lista2 será criada uma ligação (cópia vinculada) e não um
 Ao fazer lista1 = lista2[:] será criado um clone: a lista1 irá receber os itens da lista2
 """
 
-nomes = ['Alejandro', 'Filipe', 'Alini', 'Daniel', 'Daniel']
+nomes = ['Alejandro', 'Alunos', 'Alini', 'Daniel', 'Daniel']
 
 # Método insert(posicao, valor): Adiciona um item na posição escolhida, "empurrando" os demais itens para a frente
 nomes.insert(0, 'Maria')  # Isso adiciona um item na posição 0, de modo que os índices de todos os outros mudam

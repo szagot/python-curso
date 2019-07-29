@@ -15,7 +15,7 @@ if nome == 'Daniel':
     print('Amei o seu nome!')
 elif nome == 'Alini':
     print('Mesmo nome da minha esposa!')
-elif nome in 'Filipe Alejandro':
+elif nome in 'Alunos Alejandro':
     print('Mesmo nome dos meus filhos!')
 else:
     print('Que nome diferente!')

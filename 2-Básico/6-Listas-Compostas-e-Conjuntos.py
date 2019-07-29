@@ -1,5 +1,5 @@
 """
-pessoa1 = ['Filipe', 8]
+pessoa1 = ['Alunos', 8]
 pessoa2 = ['Alejandro', 6]
 
 dados = []
@@ -7,10 +7,10 @@ dados.append(pessoa1[:])
 dados.append(pessoa2[:])
 
 print(dados)
-#-> Resultado: [ ['Filipe', 8], ['Alejandro', 6] ]
+#-> Resultado: [ ['Alunos', 8], ['Alejandro', 6] ]
 
 print(dados[0][0])
-#-> Resultado: 'Filipe'
+#-> Resultado: 'Alunos'
 
 
 Outro tipo de dados são os conjuntos (set). São como as listas, porém só permitem valores únicos

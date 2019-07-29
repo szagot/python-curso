@@ -1,4 +1,4 @@
-palavras = ('Filipe', 'Alejandro', 'Daniel', 'Alini')
+palavras = ('Alunos', 'Alejandro', 'Daniel', 'Alini')
 
 for palavra in palavras:
     print(f'Na palavra {palavra.upper()} temos as vogais', end=' ')
